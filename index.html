@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Edukasi Profesi PAUD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Baloo 2', cursive;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+        .animate-bounce-slow {
+            animation: bounce 3s infinite;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 4px solid #fff;
+        }
+        .btn-game {
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 0px rgba(0,0,0,0.2);
+        }
+        .btn-game:active {
+            transform: translateY(6px);
+            box-shadow: 0 0px 0px rgba(0,0,0,0.2);
+        }
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 50px;
+            opacity: 0.8;
+            z-index: -1;
+        }
+        .letter-box {
+            transition: all 0.3s ease;
+        }
+        .letter-box.selected {
+            transform: scale(0);
+            opacity: 0;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4 relative">
+
+    <!-- Decorative Background Clouds -->
+    <div class="cloud w-32 h-12 top-10 left-10 animate-bounce-slow"></div>
+    <div class="cloud w-48 h-16 top-20 right-10 animate-bounce-slow" style="animation-delay: 1s;"></div>
+    <div class="cloud w-24 h-10 bottom-10 left-20 animate-bounce-slow" style="animation-delay: 2s;"></div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="glass-panel w-full max-w-4xl min-h-[600px] flex flex-col relative overflow-hidden">
+        
+        <!-- HEADER -->
+        <header class="bg-yellow-400 p-4 rounded-t-xl border-b-4 border-yellow-500 flex justify-between items-center z-10 hidden" id="headerNav">
+            <button onclick="goHome()" class="btn-game bg-red-500 text-white px-4 py-2 rounded-full font-bold text-lg flex items-center gap-2">
+                🏠 Kembali
+            </button>
+            <h1 class="text-2xl font-bold text-yellow-900" id="headerTitle">Menu Utama</h1>
+            <div class="w-24"></div> <!-- Spacer for centering -->
+        </header>
+
+        <!-- SCREEN: SPLASH / START -->
+        <div id="screen-splash" class="flex-1 flex flex-col items-center justify-center p-6 z-10 text-center">
+            <h1 class="text-5xl md:text-6xl font-extrabold text-blue-600 mb-4 drop-shadow-md">Aku di Masa Depan!</h1>
+            <p class="text-2xl text-gray-700 mb-8 font-semibold">Mari belajar macam-macam profesi bersama!</p>
+            <div class="relative w-64 h-64 mb-8">
+                <!-- Mascot / Group SVG -->
+                <svg viewBox="0 0 200 200" class="w-full h-full animate-bounce-slow">
+                    <circle cx="100" cy="100" r="90" fill="#FFD166" />
+                    <!-- Smile -->
+                    <path d="M 60 120 Q 100 160 140 120" stroke="#E07A5F" stroke-width="8" fill="transparent" stroke-linecap="round"/>
+                    <!-- Eyes -->
+                    <circle cx="75" cy="80" r="12" fill="#3D405B" />
+                    <circle cx="125" cy="80" r="12" fill="#3D405B" />
+                    <!-- Sparkles -->
+                    <path d="M 150 40 L 160 60 L 180 65 L 160 70 L 150 90 L 140 70 L 120 65 L 140 60 Z" fill="#fff"/>
+                </svg>
+            </div>
+            <button onclick="startGame()" class="btn-game bg-green-500 text-white text-3xl font-bold py-4 px-12 rounded-full border-4 border-white shadow-lg">
+                ▶ Mulai Bermain!
+            </button>
+        </div>
+
+        <!-- SCREEN: HOME MENU -->
+        <div id="screen-home" class="flex-1 flex flex-col items-center justify-center p-6 hidden">
+            <h2 class="text-4xl font-bold text-purple-600 mb-10 text-center">Pilih Permainanmu!</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-3xl">
+                <!-- Menu 1 -->
+                <button onclick="openMenu('learn')" class="btn-game bg-blue-400 hover:bg-blue-500 rounded-3xl p-6 flex flex-col items-center group">
+                    <div class="text-6xl mb-4 group-hover:scale-110 transition-transform">📖</div>
+                    <h3 class="text-2xl font-bold text-white text-center">Belajar Profesi</h3>
+                </button>
+                <!-- Menu 2 -->
+                <button onclick="openMenu('quiz')" class="btn-game bg-orange-400 hover:bg-orange-500 rounded-3xl p-6 flex flex-col items-center group">
+                    <div class="text-6xl mb-4 group-hover:scale-110 transition-transform">❓</div>
+                    <h3 class="text-2xl font-bold text-white text-center">Kuis Tebak</h3>
+                </button>
+                <!-- Menu 3 -->
+                <button onclick="openMenu('spell')" class="btn-game bg-pink-400 hover:bg-pink-500 rounded-3xl p-6 flex flex-col items-center group">
+                    <div class="text-6xl mb-4 group-hover:scale-110 transition-transform">🔤</div>
+                    <h3 class="text-2xl font-bold text-white text-center">Susun Huruf</h3>
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN: LEARN -->
+        <div id="screen-learn" class="flex-1 flex flex-col items-center justify-between p-4 md:p-8 hidden">
+            <div class="flex-1 w-full flex flex-col items-center justify-center relative">
+                <!-- Navigation Arrows -->
+                <button onclick="prevLearn()" class="btn-game absolute left-0 md:left-10 bg-white text-blue-500 rounded-full w-14 h-14 text-2xl font-bold flex items-center justify-center border-4 border-blue-500 z-20">
+                    &lt;
+                </button>
+                <button onclick="nextLearn()" class="btn-game absolute right-0 md:right-10 bg-white text-blue-500 rounded-full w-14 h-14 text-2xl font-bold flex items-center justify-center border-4 border-blue-500 z-20">
+                    &gt;
+                </button>
+
+                <!-- Content Box -->
+                <div class="bg-blue-50 w-full max-w-lg rounded-3xl p-6 shadow-inner flex flex-col items-center text-center">
+                    <div id="learn-image" class="w-64 h-64 mb-4">
+                        <!-- SVG Injected via JS -->
+                    </div>
+                    <h2 id="learn-title" class="text-5xl font-extrabold text-blue-700 mb-2 uppercase tracking-wide">DOKTER</h2>
+                    <div class="bg-white rounded-xl p-4 w-full border-2 border-blue-200">
+                        <p id="learn-place" class="text-xl font-bold text-gray-700 mb-2">🏥 Tempat: Rumah Sakit</p>
+                        <p id="learn-desc" class="text-lg text-gray-600 font-semibold">Tugasnya mengobati dan merawat orang yang sedang sakit agar cepat sembuh.</p>
+                    </div>
+                    <button onclick="speakCurrentLearn()" class="btn-game mt-4 bg-yellow-400 text-yellow-900 px-6 py-2 rounded-full font-bold text-xl flex items-center gap-2">
+                        🔊 Dengar Lagi
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN: QUIZ -->
+        <div id="screen-quiz" class="flex-1 flex flex-col items-center justify-center p-4 md:p-8 hidden">
+            <div class="bg-white w-full max-w-2xl rounded-3xl p-8 shadow-lg text-center flex flex-col items-center border-4 border-orange-300">
+                <div class="flex items-center justify-between w-full mb-4 px-2">
+                    <span class="text-2xl font-bold text-orange-600">Skor: <span id="quiz-score" class="text-3xl text-green-500">0</span></span>
+                    <!-- Button Lanjut ke Pertanyaan Berikutnya -->
+                    <button id="btn-next-quiz" onclick="nextQuizQuestion()" class="btn-game bg-green-500 hover:bg-green-600 text-white font-bold text-lg px-5 py-2 rounded-full flex items-center gap-2 transition-all">
+                        <span>Lanjut</span> ➔
+                    </button>
+                </div>
+                
+                <h2 id="quiz-question" class="text-3xl md:text-4xl font-extrabold text-gray-800 mb-6 leading-tight">Siapakah aku?</h2>
+                
+                <!-- Display Image -->
+                <div id="quiz-image" class="w-48 h-48 mb-6 bg-orange-50 rounded-full flex items-center justify-center p-4">
+                    <!-- SVG injected here -->
+                </div>
+
+                <!-- Answer Options -->
+                <div id="quiz-options" class="grid grid-cols-2 gap-4 w-full">
+                    <!-- Buttons injected via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN: SPELL -->
+        <div id="screen-spell" class="flex-1 flex flex-col items-center justify-center p-4 md:p-8 hidden">
+            <div class="bg-white w-full max-w-2xl rounded-3xl p-6 md:p-8 shadow-lg text-center flex flex-col items-center border-4 border-pink-300 relative">
+                <!-- Header Controls: Title & Next Button -->
+                <div class="flex items-center justify-between w-full mb-4 px-2">
+                    <span class="text-2xl font-bold text-pink-600">Susun Huruf</span>
+                    <!-- Button Lanjut ke Susun Huruf Berikutnya -->
+                    <button id="btn-next-spell" onclick="nextSpellWord()" class="btn-game bg-green-500 hover:bg-green-600 text-white font-bold text-lg px-5 py-2 rounded-full flex items-center gap-2 transition-all">
+                        <span>Lanjut</span> ➔
+                    </button>
+                </div>
+                
+                <!-- Hint Image -->
+                <div id="spell-image" class="w-40 h-40 mb-6 p-2 bg-pink-50 rounded-2xl">
+                    <!-- SVG injected here -->
+                </div>
+
+                <!-- Empty Slots -->
+                <div id="spell-slots" class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8 min-h-[4rem]">
+                    <!-- Slots injected via JS -->
+                </div>
+
+                <!-- Scrambled Letters -->
+                <div id="spell-letters" class="flex flex-wrap justify-center gap-2 md:gap-4">
+                    <!-- Letters injected via JS -->
+                </div>
+                
+                <div class="mt-8 flex gap-4">
+                    <button onclick="speak('Susun hurufnya agar menjadi kata yang benar sesuai gambar!')" class="btn-game bg-blue-400 text-white px-6 py-2 rounded-full font-bold">🔊 Bantuan Suara</button>
+                    <button onclick="resetSpell()" class="btn-game bg-red-400 text-white px-6 py-2 rounded-full font-bold">🔄 Ulangi</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- JS Logic -->
+    <script>
+        // --- DATA PROFESI ---
+        const professions = [
+            {
+                id: 'guru',
+                name: 'GURU',
+                place: 'Sekolah',
+                desc: 'Mengajar ilmu pengetahuan dan membimbing murid-murid di sekolah.',
+                svg: `
+                    <svg viewBox="0 0 100 130" class="w-full h-full drop-shadow-md">
+                        <!-- Background Blackboard -->
+                        <rect x="5" y="10" width="90" height="55" rx="6" fill="#15803d" stroke="#b45309" stroke-width="3"/>
+                        <text x="18" y="32" font-family="'Baloo 2', cursive" font-size="12" fill="#ffffff" font-weight="bold">A B C</text>
+                        <!-- Smile on board -->
+                        <path d="M 68 32 A 6 6 0 0 1 78 32" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+                        <circle cx="70" cy="25" r="1.5" fill="#ffffff"/>
+                        <circle cx="76" cy="25" r="1.5" fill="#ffffff"/>
+                        
+                        <!-- Teacher Body / Outfit (Hijab/Style) -->
+                        <!-- Hijab / Hair Frame -->
+                        <path d="M 30 40 C 25 15, 75 15, 70 40 C 75 60, 80 85, 80 115 L 20 115 C 20 85, 25 60, 30 40 Z" fill="#d97706"/>
+                        <!-- Inner Face Oval -->
+                        <ellipse cx="50" cy="45" rx="16" ry="17" fill="#fed7aa"/>
+                        
+                        <!-- Eyes Cute -->
+                        <ellipse cx="43" cy="43" rx="3.5" ry="4.5" fill="#1e293b"/>
+                        <ellipse cx="57" cy="43" rx="3.5" ry="4.5" fill="#1e293b"/>
+                        <circle cx="44.5" cy="41.5" r="1.5" fill="#ffffff"/>
+                        <circle cx="58.5" cy="41.5" r="1.5" fill="#ffffff"/>
+                        <!-- Blush -->
+                        <ellipse cx="39" cy="48" rx="3" ry="1.5" fill="#f43f5e" opacity="0.4"/>
+                        <ellipse cx="61" cy="48" rx="3" ry="1.5" fill="#f43f5e" opacity="0.4"/>
+                        <!-- Smile -->
+                        <path d="M 46 51 Q 50 56 54 51" fill="none" stroke="#9a3412" stroke-width="2" stroke-linecap="round"/>
+
+                        <!-- Clothes (Beige / Green Blazer) -->
+                        <path d="M 28 65 L 72 65 L 76 115 L 24 115 Z" fill="#65a30d"/>
+                        <path d="M 40 65 L 50 82 L 60 65 Z" fill="#fef08a"/> <!-- Inner Collar -->
+                        
+                        <!-- Book in Hand -->
+                        <rect x="22" y="75" width="18" height="22" rx="2" fill="#0284c7" transform="rotate(-10 22 75)"/>
+                        <rect x="24" y="77" width="14" height="18" rx="1" fill="#ffffff" transform="rotate(-10 22 75)"/>
+
+                        <!-- Pointer Stick -->
+                        <path d="M 68 78 L 86 52" stroke="#78350f" stroke-width="3" stroke-linecap="round"/>
+                        <!-- Hand holding pointer -->
+                        <circle cx="68" cy="78" r="4" fill="#fed7aa"/>
+                        <!-- Hand holding book -->
+                        <circle cx="34" cy="88" r="4" fill="#fed7aa"/>
+                    </svg>
+                `
+            },
+            {
+                id: 'penjual',
+                name: 'PENJUAL',
+                place: 'Toko / Pasar',
+                desc: 'Menjual barang, buah, dan makanan yang kita butuhkan sehari-hari.',
+                svg: `
+                    <svg viewBox="0 0 100 130" class="w-full h-full drop-shadow-md">
+                        <!-- Market Stall Background -->
+                        <path d="M 15 15 L 85 15 L 90 32 L 10 32 Z" fill="#f43f5e"/>
+                        <path d="M 15 15 L 29 32 L 43 15 L 57 32 L 71 15 L 85 32 L 85 15 Z" fill="#ffffff"/>
+                        <!-- Fruit Stand Table -->
+                        <rect x="12" y="70" width="76" height="28" rx="4" fill="#d97706"/>
+                        <!-- Fruits on Stand -->
+                        <circle cx="25" cy="64" r="5" fill="#ef4444"/> <!-- Apple -->
+                        <circle cx="37" cy="64" r="5" fill="#ef4444"/>
+                        <circle cx="50" cy="64" r="6" fill="#eab308"/> <!-- Banana/Lemon -->
+                        <circle cx="63" cy="64" r="5" fill="#22c55e"/> <!-- Lime -->
+                        <circle cx="75" cy="64" r="5" fill="#a855f7"/> <!-- Grape -->
+
+                        <!-- Legs -->
+                        <rect x="37" y="98" width="10" height="24" fill="#1e293b" rx="2"/>
+                        <rect x="53" y="98" width="10" height="24" fill="#1e293b" rx="2"/>
+                        <!-- Shoes -->
+                        <path d="M 31 118 Q 41 114 47 118 L 47 124 L 31 124 Z" fill="#000000"/>
+                        <path d="M 53 118 Q 59 114 69 118 L 69 124 L 53 124 Z" fill="#000000"/>
+
+                        <!-- Body / Apron -->
+                        <path d="M 28 42 L 72 42 L 75 98 L 25 98 Z" fill="#10b981"/>
+                        <path d="M 36 42 L 64 42 L 68 98 L 32 98 Z" fill="#047857"/> <!-- Apron Front -->
+
+                        <!-- Hands -->
+                        <circle cx="22" cy="68" r="4.5" fill="#fed7aa"/>
+                        <circle cx="78" cy="68" r="4.5" fill="#fed7aa"/>
+
+                        <!-- Head -->
+                        <circle cx="50" cy="28" r="16" fill="#fed7aa"/>
+                        <!-- Cap -->
+                        <path d="M 28 18 C 28 8, 72 8, 72 18 L 78 22 L 22 22 Z" fill="#10b981"/>
+                        <path d="M 22 22 Q 50 27 78 22 L 82 24 Q 50 29 18 24 Z" fill="#047857"/>
+
+                        <!-- Cute Face -->
+                        <ellipse cx="43" cy="27" rx="3" ry="4" fill="#0f172a"/>
+                        <ellipse cx="57" cy="27" rx="3" ry="4" fill="#0f172a"/>
+                        <circle cx="44" cy="25.5" r="1.2" fill="#ffffff"/>
+                        <circle cx="58" cy="25.5" r="1.2" fill="#ffffff"/>
+                        <ellipse cx="38" cy="31" rx="2.5" ry="1.2" fill="#f43f5e" opacity="0.4"/>
+                        <ellipse cx="62" cy="31" rx="2.5" ry="1.2" fill="#f43f5e" opacity="0.4"/>
+                        <path d="M 46 33 Q 50 37 54 33" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                `
+            },
+            {
+                id: 'masinis',
+                name: 'MASINIS',
+                place: 'Stasiun & Kereta Api',
+                desc: 'Mengarahkan dan mengendarai kereta api dengan aman.',
+                svg: `
+                    <svg viewBox="0 0 100 130" class="w-full h-full drop-shadow-md">
+                        <!-- Train Background -->
+                        <rect x="45" y="15" width="50" height="40" rx="8" fill="#ef4444"/>
+                        <rect x="52" y="22" width="18" height="15" rx="3" fill="#bfdbfe"/>
+                        <circle cx="60" cy="55" r="6" fill="#1e293b"/>
+                        <circle cx="82" cy="55" r="6" fill="#1e293b"/>
+                        <path d="M 45 42 L 35 42 L 30 52 L 45 52 Z" fill="#f59e0b"/>
+
+                        <!-- Legs -->
+                        <rect x="36" y="98" width="10" height="24" fill="#1e293b" rx="2"/>
+                        <rect x="54" y="98" width="10" height="24" fill="#1e293b" rx="2"/>
+                        <!-- Shoes -->
+                        <path d="M 30 118 Q 40 114 46 118 L 46 124 L 30 124 Z" fill="#000000"/>
+                        <path d="M 54 118 Q 60 114 70 118 L 70 124 L 54 124 Z" fill="#000000"/>
+
+                        <!-- Uniform Body -->
+                        <path d="M 26 52 L 74 52 L 77 100 L 23 100 Z" fill="#0284c7"/>
+                        <!-- Red Necktie -->
+                        <polygon points="46,52 54,52 52,68 48,68" fill="#dc2626"/>
+
+                        <!-- Arms -->
+                        <path d="M 26 55 Q 15 65 20 78" fill="none" stroke="#0284c7" stroke-width="8" stroke-linecap="round"/>
+                        <path d="M 74 55 Q 85 45 78 35" fill="none" stroke="#0284c7" stroke-width="8" stroke-linecap="round"/>
+                        <circle cx="20" cy="78" r="4.5" fill="#fed7aa"/>
+                        <circle cx="76" cy="33" r="4.5" fill="#fed7aa"/>
+
+                        <!-- Head -->
+                        <circle cx="50" cy="34" r="16" fill="#fed7aa"/>
+                        <!-- Masinis / Train Engineer Hat -->
+                        <path d="M 28 22 C 28 10, 72 10, 72 22 L 78 25 L 22 25 Z" fill="#0369a1"/>
+                        <path d="M 22 25 Q 50 30 78 25 L 82 27 Q 50 32 18 27 Z" fill="#0f172a"/>
+                        <!-- Train Emblem -->
+                        <circle cx="50" cy="17" r="3.5" fill="#fde047"/>
+
+                        <!-- Cute Face -->
+                        <ellipse cx="43" cy="33" rx="3" ry="4" fill="#0f172a"/>
+                        <ellipse cx="57" cy="33" rx="3" ry="4" fill="#0f172a"/>
+                        <circle cx="44" cy="31.5" r="1.2" fill="#ffffff"/>
+                        <circle cx="58" cy="31.5" r="1.2" fill="#ffffff"/>
+                        <ellipse cx="38" cy="37" rx="2.5" ry="1.2" fill="#f43f5e" opacity="0.4"/>
+                        <ellipse cx="62" cy="37" rx="2.5" ry="1.2" fill="#f43f5e" opacity="0.4"/>
+                        <path d="M 46 39 Q 50 43 54 39" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                `
+            },
+            {
+                id: 'tentara',
+                name: 'TENTARA',
+                place: 'Markas / Perbatasan Negara',
+                desc: 'Menjaga keamanan dan mempertahankan tanah air kita Indonesia.',
+                svg: `
+                    <svg viewBox="0 0 100 130" class="w-full h-full drop-shadow-md">
+                        <!-- Flag Background -->
+                        <rect x="68" y="15" width="26" height="9" fill="#ef4444"/>
+                        <rect x="68" y="24" width="26" height="9" fill="#ffffff" stroke="#cbd5e1" stroke-width="0.5"/>
+                        <line x1="68" y1="15" x2="68" y2="55" stroke="#475569" stroke-width="2.5"/>
+
+                        <!-- Legs -->
+                        <rect x="36" y="98" width="10" height="24" fill="#15803d" rx="2"/>
+                        <rect x="54" y="98" width="10" height="24" fill="#15803d" rx="2"/>
+                        <!-- Camo spots on legs -->
+                        <circle cx="40" cy="105" r="2" fill="#3f6212"/>
+                        <circle cx="58" cy="112" r="2" fill="#3f6212"/>
+                        <!-- Boots -->
+                        <path d="M 30 118 Q 40 114 46 118 L 46 124 L 30 124 Z" fill="#000000"/>
+                        <path d="M 54 118 Q 60 114 70 118 L 70 124 L 54 124 Z" fill="#000000"/>
+
+                        <!-- Body Army Camo Uniform -->
+                        <path d="M 26 52 L 74 52 L 77 100 L 23 100 Z" fill="#15803d"/>
+                        <!-- Camo Pattern Circles -->
+                        <circle cx="35" cy="65" r="4" fill="#3f6212"/>
+                        <circle cx="62" cy="72" r="5" fill="#3f6212"/>
+                        <circle cx="45" cy="85" r="4" fill="#3f6212"/>
+                        <circle cx="65" cy="88" r="3" fill="#78350f"/>
+                        <circle cx="32" cy="88" r="3.5" fill="#78350f"/>
+
+                        <!-- Saluting Arm -->
+                        <path d="M 26 55 Q 14 68 18 82" fill="none" stroke="#15803d" stroke-width="9" stroke-linecap="round"/>
+                        <circle cx="18" cy="82" r="4" fill="#fed7aa"/>
+                        <!-- Right Hand Salute -->
+                        <path d="M 74 55 Q 85 45 74 32" fill="none" stroke="#15803d" stroke-width="8" stroke-linecap="round"/>
+                        <circle cx="72" cy="30" r="4" fill="#fed7aa"/>
+
+                        <!-- Head -->
+                        <circle cx="50" cy="34" r="16" fill="#fed7aa"/>
+                        <!-- Army Beret / Helmet -->
+                        <path d="M 26 25 C 26 10, 74 10, 74 25 Z" fill="#166534"/>
+                        <path d="M 22 25 Q 50 31 78 25 L 80 27 Q 50 33 20 27 Z" fill="#14532d"/>
+                        <!-- Red White Badge on Beret -->
+                        <circle cx="38" cy="20" r="3.5" fill="#dc2626"/>
+
+                        <!-- Cute Face -->
+                        <ellipse cx="43" cy="33" rx="3" ry="4" fill="#0f172a"/>
+                        <ellipse cx="57" cy="33" rx="3" ry="4" fill="#0f172a"/>
+                        <circle cx="44" cy="31.5" r="1.2" fill="#ffffff"/>
+                        <circle cx="58" cy="31.5" r="1.2" fill="#ffffff"/>
+                        <ellipse cx="38" cy="37" rx="2.5" ry="1.2" fill="#f43f5e" opacity="0.4"/>
+                        <ellipse cx="62" cy="37" rx="2.5" ry="1.2" fill="#f43f5e" opacity="0.4"/>
+                        <path d="M 46 39 Q 50 43 54 39" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                `
+            },
+            {
+                id: 'koki',
+                name: 'KOKI',
+                place: 'Restoran / Dapur',
+                desc: 'Memasak makanan lezat dan bergizi di dapur restoran.',
+                svg: `
+                    <svg viewBox="0 0 100 130" class="w-full h-full drop-shadow-md">
+                        <!-- Frying Pan Background -->
+                        <circle cx="75" cy="45" r="16" fill="#334155"/>
+                        <rect x="85" y="55" width="14" height="5" rx="2" fill="#78350f" transform="rotate(35 85 55)"/>
+
+                        <!-- Legs -->
+                        <rect x="37" y="98" width="10" height="24" fill="#1e293b" rx="2"/>
+                        <rect x="53" y="98" width="10" height="24" fill="#1e293b" rx="2"/>
+                        <!-- Shoes -->
+                        <path d="M 31 118 Q 41 114 47 118 L 47 124 L 31 124 Z" fill="#000000"/>
+                        <path d="M 53 118 Q 59 114 69 118 L 69 124 L 53 124 Z" fill="#000000"/>
+
+                        <!-- Chef Jacket -->
+                        <path d="M 28 52 L 72 52 L 75 100 L 25 100 Z" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+                        <!-- Black Double Buttons -->
+                        <circle cx="43" cy="62" r="2" fill="#0f172a"/>
+                        <circle cx="57" cy="62" r="2" fill="#0f172a"/>
+                        <circle cx="43" cy="74" r="2" fill="#0f172a"/>
+                        <circle cx="57" cy="74" r="2" fill="#0f172a"/>
+                        <circle cx="43" cy="86" r="2" fill="#0f172a"/>
+                        <circle cx="57" cy="86" r="2" fill="#0f172a"/>
+                        <!-- Red Necktie Scarf -->
+                        <path d="M 44 52 L 56 52 L 50 62 Z" fill="#ef4444"/>
+
+                        <!-- Arms -->
+                        <path d="M 26 55 Q 16 70 24 82" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+                        <path d="M 74 55 Q 84 68 76 80" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+                        <circle cx="24" cy="82" r="4.5" fill="#fed7aa"/>
+                        <circle cx="76" cy="80" r="4.5" fill="#fed7aa"/>
+
+                        <!-- Head -->
+                        <circle cx="50" cy="34" r="16" fill="#fed7aa"/>
+                        <!-- Tall Chef Hat -->
+                        <path d="M 30 24 Q 25 2 40 2 Q 50 -4 60 2 Q 75 2 70 24 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+                        <rect x="32" y="20" width="36" height="8" fill="#ffffff" rx="1" stroke="#cbd5e1" stroke-width="1"/>
+
+                        <!-- Cute Face -->
+                        <ellipse cx="43" cy="33" rx="3" ry="4" fill="#0f172a"/>
+                        <ellipse cx="57" cy="33" rx="3" ry="4" fill="#0f172a"/>
+                        <circle cx="44" cy="31.5" r="1.2" fill="#ffffff"/>
+                        <circle cx="58" cy="31.5" r="1.2" fill="#ffffff"/>
+                        <ellipse cx="38" cy="37" rx="2.5" ry="1.2" fill="#f43f5e" opacity="0.4"/>
+                        <ellipse cx="62" cy="37" rx="2.5" ry="1.2" fill="#f43f5e" opacity="0.4"/>
+                        <path d="M 46 39 Q 50 43 54 39" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                `
+            }
+        ];
+
+        // --- AUDIO ENGINE ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSound(type) {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            if (type === 'correct') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                osc.frequency.exponentialRampToValueAtTime(1046.50, audioCtx.currentTime + 0.1); // C6
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.5);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.3);
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'pop') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            }
+        }
+
+        let isSpeaking = false;
+        function speak(text, callback) {
+            window.speechSynthesis.cancel(); // Stop current speech
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'id-ID';
+            utterance.rate = 0.9; // Slightly slower for kids
+            utterance.pitch = 1.2; // Slightly higher pitch for friendliness
+            
+            utterance.onstart = () => isSpeaking = true;
+            utterance.onend = () => {
+                isSpeaking = false;
+                if(callback) callback();
+            };
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // --- NAVIGATION & STATE ---
+        function hideAllScreens() {
+            ['screen-splash', 'screen-home', 'screen-learn', 'screen-quiz', 'screen-spell'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById('headerNav').classList.remove('hidden');
+        }
+
+        function startGame() {
+            playSound('pop');
+            // Init audio context on first user gesture
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            
+            hideAllScreens();
+            document.getElementById('screen-home').classList.remove('hidden');
+            document.getElementById('headerNav').classList.add('hidden');
+            speak("Halo! Selamat datang di permainan profesi. Pilih permainan yang kamu suka!");
+        }
+
+        function goHome() {
+            playSound('pop');
+            window.speechSynthesis.cancel();
+            hideAllScreens();
+            document.getElementById('screen-home').classList.remove('hidden');
+            document.getElementById('headerNav').classList.add('hidden');
+        }
+
+        function openMenu(menu) {
+            playSound('pop');
+            hideAllScreens();
+            const titles = {
+                'learn': 'Belajar Profesi',
+                'quiz': 'Kuis Profesi',
+                'spell': 'Susun Huruf'
+            };
+            document.getElementById('headerTitle').innerText = titles[menu];
+            document.getElementById(`screen-${menu}`).classList.remove('hidden');
+
+            if(menu === 'learn') {
+                currentLearnIdx = 0;
+                renderLearn();
+            } else if (menu === 'quiz') {
+                quizScore = 0;
+                updateScore();
+                generateQuiz();
+                speak("Ayo tebak profesi ini! Perhatikan gambarnya dengan baik.");
+            } else if (menu === 'spell') {
+                generateSpell();
+                speak("Mari susun huruf-huruf ini menjadi nama profesi yang benar!");
+            }
+        }
+
+        // --- LEARN MODULE ---
+        let currentLearnIdx = 0;
+        
+        function renderLearn() {
+            const data = professions[currentLearnIdx];
+            document.getElementById('learn-image').innerHTML = data.svg;
+            document.getElementById('learn-title').innerText = data.name;
+            document.getElementById('learn-place').innerText = `🏥 Tempat: ${data.place}`;
+            document.getElementById('learn-desc').innerText = data.desc;
+            speakCurrentLearn();
+        }
+
+        function speakCurrentLearn() {
+            const data = professions[currentLearnIdx];
+            const text = `Ini adalah ${data.name}. Dia bekerja di ${data.place}. ${data.desc}`;
+            speak(text);
+        }
+
+        function nextLearn() {
+            playSound('pop');
+            currentLearnIdx = (currentLearnIdx + 1) % professions.length;
+            renderLearn();
+        }
+
+        function prevLearn() {
+            playSound('pop');
+            currentLearnIdx = (currentLearnIdx - 1 + professions.length) % professions.length;
+            renderLearn();
+        }
+
+        // --- QUIZ MODULE ---
+        let quizScore = 0;
+        let currentQuizAnswer = null;
+        let currentQuizType = null; // 'name' or 'place'
+        let hasAnsweredQuiz = false;
+
+        function updateScore() {
+            document.getElementById('quiz-score').innerText = quizScore;
+        }
+
+        function generateQuiz() {
+            hasAnsweredQuiz = false;
+            
+            // Randomly select a profession
+            const target = professions[Math.floor(Math.random() * professions.length)];
+            currentQuizAnswer = target;
+            
+            // Randomly select quiz type
+            currentQuizType = Math.random() > 0.5 ? 'name' : 'place';
+            
+            document.getElementById('quiz-image').innerHTML = target.svg;
+            
+            let questionText = "";
+            let options = [];
+
+            if (currentQuizType === 'name') {
+                questionText = "Siapakah aku?";
+                options = generateOptions(professions.map(p => p.name), target.name);
+            } else {
+                questionText = "Di manakah aku bekerja?";
+                options = generateOptions(professions.map(p => p.place), target.place);
+            }
+
+            document.getElementById('quiz-question').innerText = questionText;
+            
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+            
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-game bg-blue-100 hover:bg-blue-200 text-blue-900 border-2 border-blue-400 font-bold text-xl md:text-2xl py-4 px-6 rounded-2xl w-full';
+                btn.innerText = opt;
+                btn.onclick = () => checkQuiz(opt, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function nextQuizQuestion() {
+            playSound('pop');
+            generateQuiz();
+            speak("Ayo tebak pertanyaan selanjutnya!");
+        }
+
+        function generateOptions(allOptions, correctAnswer) {
+            let uniqueOpts = Array.from(new Set(allOptions));
+            uniqueOpts = uniqueOpts.filter(o => o !== correctAnswer);
+            // Shuffle and pick up to 3 wrong answers
+            uniqueOpts.sort(() => 0.5 - Math.random());
+            let finalOptions = [correctAnswer, ...uniqueOpts.slice(0, 3)];
+            // Shuffle final options
+            return finalOptions.sort(() => 0.5 - Math.random());
+        }
+
+        function checkQuiz(selected, btnElement) {
+            if (hasAnsweredQuiz) return; // Prevent double clicking after correct answer
+
+            const isCorrect = (currentQuizType === 'name' && selected === currentQuizAnswer.name) || 
+                              (currentQuizType === 'place' && selected === currentQuizAnswer.place);
+            
+            if (isCorrect) {
+                hasAnsweredQuiz = true;
+                playSound('correct');
+                quizScore += 10;
+                updateScore();
+                btnElement.classList.remove('bg-blue-100', 'border-blue-400');
+                btnElement.classList.add('bg-green-400', 'text-white', 'border-green-600');
+                
+                // Highlight next button with animation
+                const nextBtn = document.getElementById('btn-next-quiz');
+                nextBtn.classList.add('animate-bounce');
+                setTimeout(() => nextBtn.classList.remove('animate-bounce'), 2000);
+
+                const praise = ["Wah, kamu pintar sekali!", "Jawabanmu benar, hebat!", "Luar biasa! Tekan tombol lanjut untuk soal berikutnya."];
+                speak(praise[Math.floor(Math.random() * praise.length)]);
+            } else {
+                playSound('wrong');
+                btnElement.classList.remove('bg-blue-100', 'border-blue-400');
+                btnElement.classList.add('bg-red-400', 'text-white', 'border-red-600');
+                
+                // Shake animation
+                btnElement.classList.add('animate-pulse');
+                setTimeout(() => btnElement.classList.remove('animate-pulse'), 500);
+                
+                speak("Ups, belum tepat. Coba lagi ya!");
+                setTimeout(() => {
+                    btnElement.classList.remove('bg-red-400', 'text-white', 'border-red-600');
+                    btnElement.classList.add('bg-blue-100', 'border-blue-400');
+                }, 1500);
+            }
+        }
+
+        // --- SPELL MODULE ---
+        let currentSpellWord = "";
+        let spellProgress = [];
+        let shuffledLetters = [];
+
+        function generateSpell() {
+            const target = professions[Math.floor(Math.random() * professions.length)];
+            currentSpellWord = target.name.toLowerCase();
+            spellProgress = Array(currentSpellWord.length).fill(null);
+            
+            document.getElementById('spell-image').innerHTML = target.svg;
+            
+            // Create slots
+            const slotsContainer = document.getElementById('spell-slots');
+            slotsContainer.innerHTML = '';
+            for(let i=0; i<currentSpellWord.length; i++){
+                const slot = document.createElement('div');
+                slot.className = 'w-12 h-14 md:w-16 md:h-20 bg-gray-100 border-4 border-dashed border-gray-300 rounded-xl flex items-center justify-center text-3xl font-bold text-pink-600 lowercase';
+                slotsContainer.appendChild(slot);
+            }
+
+            // Create scrambled letters
+            shuffledLetters = currentSpellWord.split('').sort(() => 0.5 - Math.random());
+            renderSpellLetters();
+        }
+
+        function nextSpellWord() {
+            playSound('pop');
+            generateSpell();
+            speak("Mari susun kata profesi selanjutnya!");
+        }
+
+        function renderSpellLetters() {
+            const lettersContainer = document.getElementById('spell-letters');
+            lettersContainer.innerHTML = '';
+            
+            shuffledLetters.forEach((letter, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'letter-box btn-game bg-pink-400 text-white w-14 h-14 md:w-16 md:h-16 rounded-xl font-bold text-3xl flex items-center justify-center border-b-4 border-pink-600 cursor-pointer lowercase';
+                btn.innerText = letter;
+                btn.onclick = () => handleLetterClick(letter, index, btn);
+                lettersContainer.appendChild(btn);
+            });
+        }
+
+        function handleLetterClick(letter, index, btnElement) {
+            // Find first empty slot
+            const emptyIdx = spellProgress.indexOf(null);
+            if (emptyIdx === -1) return; // Full
+
+            playSound('pop');
+            
+            // Animate hide original letter
+            btnElement.classList.add('selected');
+            setTimeout(() => {
+                btnElement.style.display = 'none';
+            }, 300);
+
+            // Fill slot
+            spellProgress[emptyIdx] = { char: letter, originalIndex: index, btn: btnElement };
+            updateSlots();
+
+            // Check if full
+            if (spellProgress.indexOf(null) === -1) {
+                checkSpellWord();
+            }
+        }
+
+        function updateSlots() {
+            const slots = document.getElementById('spell-slots').children;
+            for(let i=0; i<spellProgress.length; i++) {
+                if (spellProgress[i]) {
+                    slots[i].innerText = spellProgress[i].char;
+                    slots[i].classList.remove('border-dashed', 'border-gray-300', 'bg-gray-100');
+                    slots[i].classList.add('bg-pink-100', 'border-solid', 'border-pink-400');
+                    
+                    // Allow clicking slot to remove letter
+                    slots[i].onclick = () => removeLetterFromSlot(i);
+                    slots[i].style.cursor = 'pointer';
+                } else {
+                    slots[i].innerText = '';
+                    slots[i].classList.add('border-dashed', 'border-gray-300', 'bg-gray-100');
+                    slots[i].classList.remove('bg-pink-100', 'border-solid', 'border-pink-400');
+                    slots[i].onclick = null;
+                    slots[i].style.cursor = 'default';
+                }
+            }
+        }
+
+        function removeLetterFromSlot(slotIndex) {
+            playSound('pop');
+            const item = spellProgress[slotIndex];
+            if(!item) return;
+
+            // Restore original button
+            item.btn.style.display = 'flex';
+            setTimeout(() => {
+                item.btn.classList.remove('selected');
+            }, 10);
+
+            spellProgress[slotIndex] = null;
+            updateSlots();
+        }
+
+        function checkSpellWord() {
+            const formedWord = spellProgress.map(p => p.char).join('');
+            if (formedWord === currentSpellWord) {
+                playSound('correct');
+                
+                // Highlight next button with bounce animation
+                const nextBtn = document.getElementById('btn-next-spell');
+                nextBtn.classList.add('animate-bounce');
+                setTimeout(() => nextBtn.classList.remove('animate-bounce'), 2000);
+
+                speak(`Hore! Kamu berhasil menyusun kata ${currentSpellWord}. Hebat! Tekan tombol lanjut untuk kata berikutnya.`);
+                
+                // Success animation on slots
+                const slots = document.getElementById('spell-slots').children;
+                for(let slot of slots) {
+                    slot.classList.remove('border-pink-400');
+                    slot.classList.add('border-green-500', 'bg-green-100', 'text-green-600', 'animate-bounce');
+                }
+            } else {
+                playSound('wrong');
+                speak("Oh tidak, susunannya belum pas. Coba perbaiki lagi ya!");
+                
+                // Error animation
+                const slots = document.getElementById('spell-slots').children;
+                for(let slot of slots) {
+                    slot.classList.add('border-red-500', 'bg-red-100');
+                    setTimeout(() => {
+                        slot.classList.remove('border-red-500', 'bg-red-100');
+                    }, 1000);
+                }
+            }
+        }
+
+        function resetSpell() {
+            playSound('pop');
+            spellProgress.forEach((item, i) => {
+                if(item) removeLetterFromSlot(i);
+            });
+        }
+
+        // Handle leaving page - stop speaking
+        window.onbeforeunload = function () {
+            window.speechSynthesis.cancel();
+        };
+    </script>
+</body>
+</html>
